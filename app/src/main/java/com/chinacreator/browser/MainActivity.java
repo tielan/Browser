@@ -3,37 +3,31 @@ package com.chinacreator.browser;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.chinacreator.browser.utils.ShakeUtils;
+import com.chinacreator.browser.detector.MultiTouchDetector;
+import com.chinacreator.browser.detector.MultiTouchListener;
+import com.tencent.smtt.sdk.WebSettings;
 import com.tencent.smtt.sdk.WebView;
 import com.tencent.smtt.sdk.WebViewClient;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 
 public class MainActivity extends AppCompatActivity {
     private WebView webView;
-    private ShakeUtils mShakeUtils;
     private AlertDialog mDialog;
-    private final int DOUBLE_TAP_TIMEOUT = 200;
-    private MotionEvent mCurrentDownEvent;
-    private MotionEvent mPreviousUpEvent;
+    private MultiTouchDetector multiTouchDetector;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,68 +37,73 @@ public class MainActivity extends AppCompatActivity {
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         webView = findViewById(R.id.webview);
-        mShakeUtils = new ShakeUtils(this);
-        mShakeUtils.setOnShakeListener(new ShakeUtils.OnShakeListener() {
-            @Override
-            public void onShake() {
-                // showDialog();
-            }
-        });
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setUseWideViewPort(true);
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setPluginsEnabled(true);
+
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                loadurlLocalMethod(view, url);
+                new Thread(() -> webView.loadUrl(url));
                 return false;
             }
         });
+//        webView.setWebViewClient(new WebViewClient() {
+//            @Override
+//            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+//                //view.loadUrl("file:///android_assets/error_handle.html");
+//            }
+//        });
         webView.setOnTouchListener(listener);
+        multiTouchDetector = new MultiTouchDetector(new MultiTouchListener() {
+            @Override
+            public void onTapUp(int numFingers) {
 
-    }
+            }
 
-    private View.OnTouchListener listener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                if (mPreviousUpEvent != null
-                        && mCurrentDownEvent != null
-                        && isConsideredDoubleTap(mCurrentDownEvent,
-                        mPreviousUpEvent, event)) {
+            @Override
+            public void onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY, int numFingers) {
+                if (Math.abs(distanceX) > 20 && numFingers == 2) {
                     showDialog();
                 }
-                mCurrentDownEvent = MotionEvent.obtain(event);
-            } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                mPreviousUpEvent = MotionEvent.obtain(event);
             }
-            return false;
-        }
+        });
+    }
+
+    private View.OnTouchListener listener = (v, event) -> {
+        multiTouchDetector.onTouchEvent(event);
+        return false;
     };
 
-    private boolean isConsideredDoubleTap(MotionEvent firstDown,
-                                          MotionEvent firstUp, MotionEvent secondDown) {
-        if (secondDown.getEventTime() - firstUp.getEventTime() > DOUBLE_TAP_TIMEOUT) {
-            return false;
-        }
-        int deltaX = (int) firstUp.getX() - (int) secondDown.getX();
-        int deltaY = (int) firstUp.getY() - (int) secondDown.getY();
-        return deltaX * deltaX + deltaY * deltaY < 10000;
-    }
-
-
-    public void loadurlLocalMethod(final WebView webView, final String url) {
-        new Thread(() -> webView.loadUrl(url));
-    }
 
     @Override
     protected void onResume() {
         super.onResume();
+        webView.onResume();
         loadUrl();
-        mShakeUtils.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mShakeUtils.onPause();
+        webView.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (webView != null) {
+            webView.loadDataWithBaseURL(null, "", "text/html", "utf-8", null);
+            webView.clearHistory();
+
+            ((ViewGroup) webView.getParent()).removeView(webView);
+            webView.destroy();
+            webView = null;
+        }
+        super.onDestroy();
     }
 
     private void showDialog() {
