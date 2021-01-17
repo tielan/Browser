@@ -2,6 +2,7 @@ package com.chinacreator.browser;
 
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -19,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.chinacreator.browser.detector.MultiTouchDetector;
 import com.chinacreator.browser.detector.MultiTouchListener;
+import com.chinacreator.browser.utils.ConfigUtils;
 import com.tencent.smtt.sdk.WebSettings;
 import com.tencent.smtt.sdk.WebView;
 import com.tencent.smtt.sdk.WebViewClient;
@@ -28,12 +31,15 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private AlertDialog mDialog;
     private MultiTouchDetector multiTouchDetector;
+    private int screenOrientation = -1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);//这行代码一定要在setContentView之前，不然会闪退
         setContentView(R.layout.activity_main);
+        ConfigUtils.getInstance().init(this);
+
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         webView = findViewById(R.id.webview);
@@ -72,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        showDialog();
     }
 
     private View.OnTouchListener listener = (v, event) -> {
@@ -84,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         webView.onResume();
-        loadUrl();
+        loadConfig();
     }
 
     @Override
@@ -110,49 +117,50 @@ public class MainActivity extends AppCompatActivity {
         if (mDialog != null) return;
         final EditText inputServer = new EditText(this);
         inputServer.setHint("http://172.16.17.1:8080");
-        inputServer.setText(getUrl());
+        inputServer.setText(ConfigUtils.getInstance().get("url"));
         inputServer.setInputType(InputType.TYPE_TEXT_VARIATION_URI);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        int o = 0;
+        if (!TextUtils.isEmpty(ConfigUtils.getInstance().get("screenOrientation"))) {
+             o = Integer.parseInt(ConfigUtils.getInstance().get("screenOrientation"));
+        }
+        builder.setSingleChoiceItems(new String[]{"默认方向","竖屏","横屏"}, o, (dialog, which) -> {
+            screenOrientation = which;
+        });
         builder.setView(inputServer)
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mDialog = null;
-                        dialog.dismiss();
-                    }
+                .setNegativeButton("取消", (dialog, which) -> {
+                    screenOrientation = -1;
+                    mDialog = null;
+                    dialog.dismiss();
                 });
-        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                mDialog = null;
-                String text = inputServer.getText().toString();
-                setUrl(text);
+        builder.setPositiveButton("确定", (dialog, which) -> {
+            mDialog = null;
+            String text = inputServer.getText().toString();
+            ConfigUtils.getInstance().set("url", text);
+            if(screenOrientation > -1){
+                ConfigUtils.getInstance().set("screenOrientation", screenOrientation + "");
             }
+            screenOrientation = -1;
+            loadConfig();
         });
-        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                mDialog = null;
-            }
-        });
+        builder.setOnDismissListener(dialog -> mDialog = null);
         mDialog = builder.show();
     }
 
-    private void loadUrl() {
-        if (!TextUtils.isEmpty(getUrl())) {
-            webView.loadUrl(getUrl());
+    private void loadConfig() {
+        if (!TextUtils.isEmpty(ConfigUtils.getInstance().get("url"))) {
+            webView.loadUrl(ConfigUtils.getInstance().get("url"));
         }
-    }
-
-    private void setUrl(String url) {
-        SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-        editor.putString("url", url);
-        editor.apply();
-        loadUrl();
-    }
-
-    private String getUrl() {
-        SharedPreferences pre = getSharedPreferences("data", MODE_PRIVATE);
-        return pre.getString("url", null);
+        if (!TextUtils.isEmpty(ConfigUtils.getInstance().get("screenOrientation"))) {
+            int o = Integer.parseInt(ConfigUtils.getInstance().get("screenOrientation"));
+            if(o == 0){
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            }else  if(o == 1){
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            }else  if(o == 2){
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            }
+        }
     }
 
 
@@ -175,5 +183,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             return super.onKeyDown(keyCode, event);
         }
+    }
+
+    private void showMessage(String str) {
+        Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
     }
 }

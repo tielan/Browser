@@ -13,9 +13,17 @@ android {
         versionCode 1
         versionName "1.0"
     }
-
+    signingConfigs {
+        myConfig {
+            storeFile file("tl.jks")
+            storePassword "123456"
+            keyAlias "key0"
+            keyPassword "123456"//将这里的“**”替换成自己的信息
+        }
+    }
     buildTypes {
         release {
+            signingConfig  signingConfigs.myConfig
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
