@@ -20,11 +20,9 @@ public class MultiTouchDetector implements GestureDetector.OnGestureListener {
         this.listener = listener;
     }
 
-    public void onTouchEvent(MotionEvent event) {
-        gestureDetector.onTouchEvent(event);
+    public boolean onTouchEvent(MotionEvent event) {
         int numFingers = event.getPointerCount();
         int fingerIndex = numFingers - 1;
-
         switch (event.getActionIndex()) {
             case (MotionEvent.ACTION_UP):
 
@@ -60,6 +58,7 @@ public class MultiTouchDetector implements GestureDetector.OnGestureListener {
             case (MotionEvent.ACTION_SCROLL):
 
         }
+       return gestureDetector.onTouchEvent(event);
 
     }
 

@@ -1,7 +1,5 @@
 package com.chinacreator.browser;
 
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.text.InputType;
@@ -15,13 +13,12 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.chinacreator.browser.detector.MultiTouchDetector;
-import com.chinacreator.browser.detector.MultiTouchListener;
 import com.chinacreator.browser.utils.ConfigUtils;
+import com.chinacreator.browser.utils.ShakeUtils;
 import com.tencent.smtt.sdk.WebSettings;
 import com.tencent.smtt.sdk.WebView;
 import com.tencent.smtt.sdk.WebViewClient;
@@ -30,7 +27,6 @@ import com.tencent.smtt.sdk.WebViewClient;
 public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private AlertDialog mDialog;
-    private MultiTouchDetector multiTouchDetector;
     private int screenOrientation = -1;
 
     @Override
@@ -58,46 +54,33 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-//        webView.setWebViewClient(new WebViewClient() {
-//            @Override
-//            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-//                //view.loadUrl("file:///android_assets/error_handle.html");
-//            }
-//        });
-        webView.setOnTouchListener(listener);
-        multiTouchDetector = new MultiTouchDetector(new MultiTouchListener() {
-            @Override
-            public void onTapUp(int numFingers) {
-
-            }
-
-            @Override
-            public void onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY, int numFingers) {
-                if (Math.abs(distanceX) > 20 && numFingers == 2) {
-                    showDialog();
-                }
-            }
+        webView.setOnLongClickListener(view -> {
+            showDialog();
+            return false;
         });
-        showDialog();
+        if (TextUtils.isEmpty(ConfigUtils.getInstance().get("url"))) {
+            showDialog();
+        }
+
     }
 
-    private View.OnTouchListener listener = (v, event) -> {
-        multiTouchDetector.onTouchEvent(event);
-        return false;
+    private View.OnTouchListener listener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+            return false;
+        }
     };
-
 
     @Override
     protected void onResume() {
         super.onResume();
-        webView.onResume();
         loadConfig();
     }
+
 
     @Override
     protected void onPause() {
         super.onPause();
-        webView.onPause();
     }
 
     @Override
@@ -122,9 +105,9 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         int o = 0;
         if (!TextUtils.isEmpty(ConfigUtils.getInstance().get("screenOrientation"))) {
-             o = Integer.parseInt(ConfigUtils.getInstance().get("screenOrientation"));
+            o = Integer.parseInt(ConfigUtils.getInstance().get("screenOrientation"));
         }
-        builder.setSingleChoiceItems(new String[]{"默认方向","竖屏","横屏"}, o, (dialog, which) -> {
+        builder.setSingleChoiceItems(new String[]{"默认方向", "竖屏", "横屏"}, o, (dialog, which) -> {
             screenOrientation = which;
         });
         builder.setView(inputServer)
@@ -137,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
             mDialog = null;
             String text = inputServer.getText().toString();
             ConfigUtils.getInstance().set("url", text);
-            if(screenOrientation > -1){
+            if (screenOrientation > -1) {
                 ConfigUtils.getInstance().set("screenOrientation", screenOrientation + "");
             }
             screenOrientation = -1;
@@ -153,11 +136,11 @@ public class MainActivity extends AppCompatActivity {
         }
         if (!TextUtils.isEmpty(ConfigUtils.getInstance().get("screenOrientation"))) {
             int o = Integer.parseInt(ConfigUtils.getInstance().get("screenOrientation"));
-            if(o == 0){
+            if (o == 0) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-            }else  if(o == 1){
+            } else if (o == 1) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            }else  if(o == 2){
+            } else if (o == 2) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             }
         }
