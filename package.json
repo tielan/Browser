@@ -1,0 +1,22 @@
+{
+  "name": "browser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "apk":"gradlew.bat assembleRelease && start app\\build\\outputs\\apk\\release",
+    "debug":"gradlew.bat assembleRelease && start app\\build\\outputs\\apk\\debug"
+
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tielan/Browser.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tielan/Browser/issues"
+  },
+  "homepage": "https://github.com/tielan/Browser#readme"
+}

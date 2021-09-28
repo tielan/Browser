@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
 }
+apply plugin: 'com.yanzhenjie.andserver'
 
 android {
     compileSdkVersion 30
@@ -10,8 +11,8 @@ android {
         applicationId "com.chinacreator.browser"
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+        versionCode 8
+        versionName "1.1.0"
     }
     signingConfigs {
         myConfig {
@@ -26,8 +27,14 @@ android {
             signingConfig  signingConfigs.myConfig
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            android.applicationVariants.all { variant ->
+                variant.outputs.all {
+                    outputFileName = "Browser_${variant.versionName}_release.apk"
+                }
+            }
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -41,6 +48,12 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.navigation:navigation-fragment:2.3.1'
     implementation 'androidx.navigation:navigation-ui:2.3.1'
+    implementation 'com.yanzhenjie.andserver:api:2.1.9'
+    annotationProcessor 'com.yanzhenjie.andserver:processor:2.1.9'
+    implementation 'org.greenrobot:eventbus:3.2.0'
+    compile 'com.alibaba:fastjson:1.1.70.android'
+    //  implementation 'com.tencent.bugly:crashreport:latest.release'
+    implementation 'com.tencent.bugly:crashreport_upgrade:latest.release'//其中latest.release指代最新版本号，也可以指定明确的版本号，例如1.2.0
     api 'com.tencent.tbs.tbssdk:sdk:43939'
 
 }

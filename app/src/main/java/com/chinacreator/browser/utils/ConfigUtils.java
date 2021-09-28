@@ -2,6 +2,11 @@ package com.chinacreator.browser.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.text.TextUtils;
+
+import com.chinacreator.browser.event.MessageEvent;
+
+import org.w3c.dom.Text;
 
 public class ConfigUtils {
     private Context mContext;
@@ -24,5 +29,28 @@ public class ConfigUtils {
     public String get(String key) {
         SharedPreferences pre = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);
         return pre.getString(key, null);
+    }
+
+    public MessageEvent getConfig() {
+        MessageEvent event = new MessageEvent();
+        event.setUrl(ConfigUtils.getInstance().get(MessageEvent.C_url));
+        event.setOrientation(ConfigUtils.getInstance().get(MessageEvent.C_screenOrientation));
+        event.setShowBack(ConfigUtils.getInstance().get(MessageEvent.C_showBack));
+        return event;
+    }
+
+    public void saveConfig(MessageEvent event) {
+        if(event != null){
+            if (!TextUtils.isEmpty(event.getUrl())) {
+                set(MessageEvent.C_url, event.getUrl());
+            }
+            if (!TextUtils.isEmpty(event.getOrientation())) {
+                set(MessageEvent.C_screenOrientation, event.getOrientation());
+            }
+            if (!TextUtils.isEmpty(event.getShowBack())) {
+                set(MessageEvent.C_showBack, event.getShowBack());
+            }
+        }
+
     }
 }

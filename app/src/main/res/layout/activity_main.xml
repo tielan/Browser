@@ -1,12 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/container"
     tools:context=".MainActivity">
 
   <com.tencent.smtt.sdk.WebView
       android:id="@+id/webview"
-      android:layout_height="match_parent"
-      android:layout_width="match_parent"/>
-</LinearLayout>
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
+
+
+  </com.tencent.smtt.sdk.WebView>
+
+  <RelativeLayout
+      android:id="@+id/backly"
+      android:visibility="gone"
+      android:layout_width="match_parent"
+      android:layout_marginRight="15dp"
+      android:layout_marginTop="15dp"
+      android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/home"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="15dp"
+        android:layout_toLeftOf="@id/back"
+        app:srcCompat="@mipmap/home" />
+
+    <ImageView
+        android:id="@+id/back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        app:srcCompat="@mipmap/back" />
+  </RelativeLayout>
+
+
+  <RelativeLayout
+      android:id="@+id/info"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/infoTv"
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+         />
+  </RelativeLayout>
+</FrameLayout>
