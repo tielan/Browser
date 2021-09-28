@@ -6,29 +6,22 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.text.InputType;
 import android.text.TextUtils;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
-import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.chinacreator.browser.detector.MultiTouchDetector;
 import com.chinacreator.browser.event.ExitAppEvent;
 import com.chinacreator.browser.event.MessageEvent;
 import com.chinacreator.browser.utils.ConfigUtils;
 import com.chinacreator.browser.utils.NetUtils;
-import com.chinacreator.browser.utils.ShakeUtils;
 import com.tencent.smtt.sdk.WebSettings;
 import com.tencent.smtt.sdk.WebView;
 import com.tencent.smtt.sdk.WebViewClient;
@@ -39,7 +32,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.net.InetAddress;
 import java.util.concurrent.TimeUnit;
 
 
@@ -69,9 +61,12 @@ public class MainActivity extends AppCompatActivity {
         infoView = findViewById(R.id.info);
         infoTV = findViewById(R.id.infoTv);
 
+
         WebSettings webSettings = webView.getSettings();
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
+        webSettings.setAllowFileAccess(true);
+        webSettings.setAllowContentAccess(true);
         webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         webSettings.setDomStorageEnabled(true);
         webSettings.setJavaScriptEnabled(true);
@@ -117,9 +112,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(ExitAppEvent event) {
-        if(event.isExitApp()){
+        if (event.isExitApp()) {
             exitSys();
-        }else  if(event.isRestartApp()){
+        } else if (event.isRestartApp()) {
             restartApp();
         }
 
@@ -192,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
         System.exit(0);
     }
 
-    private void restartApp(){
+    private void restartApp() {
         final Intent intent = getPackageManager().getLaunchIntentForPackage(getPackageName());
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);

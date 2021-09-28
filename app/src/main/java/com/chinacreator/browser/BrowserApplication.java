@@ -48,7 +48,7 @@ public class BrowserApplication extends Application {
         } else {
             mRootDir = context.getFilesDir();
         }
-        mRootDir = new File(mRootDir, "browser");
+        mRootDir = new File(mRootDir, "html");
         IOUtils.createFolder(mRootDir);
     }
 }

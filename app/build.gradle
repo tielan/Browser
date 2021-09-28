@@ -12,7 +12,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 30
         versionCode 8
-        versionName "1.1.0"
+        versionName "1.1.2"
     }
     signingConfigs {
         myConfig {
@@ -51,6 +51,7 @@ dependencies {
     implementation 'com.yanzhenjie.andserver:api:2.1.9'
     annotationProcessor 'com.yanzhenjie.andserver:processor:2.1.9'
     implementation 'org.greenrobot:eventbus:3.2.0'
+
     compile 'com.alibaba:fastjson:1.1.70.android'
     //  implementation 'com.tencent.bugly:crashreport:latest.release'
     implementation 'com.tencent.bugly:crashreport_upgrade:latest.release'//其中latest.release指代最新版本号，也可以指定明确的版本号，例如1.2.0

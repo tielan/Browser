@@ -33,6 +33,7 @@ import com.yanzhenjie.andserver.util.MediaType;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
@@ -44,6 +45,8 @@ class AppController {
 
     @PostMapping(path = "/deployFile", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     String deployFile(@RequestParam(name = "file") MultipartFile file) throws Exception {
+//        File localFile = FileUtils.createRandomFile(file);
+//        file.transferTo(localFile);
         String targetPath = FileUtils.getRandomPath().getAbsolutePath();
         ZipUtil.UnZipFolder(file.getStream(),targetPath );
         MessageEvent event = new MessageEvent();
