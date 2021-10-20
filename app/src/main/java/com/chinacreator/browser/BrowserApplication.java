@@ -6,11 +6,15 @@ import android.os.Environment;
 
 import androidx.annotation.NonNull;
 
+import com.chinacreator.browser.crash.CrashHandler;
 import com.chinacreator.browser.utils.FileUtils;
 import com.tencent.bugly.Bugly;
+import com.tencent.smtt.export.external.TbsCoreSettings;
+import com.tencent.smtt.sdk.QbSdk;
 import com.yanzhenjie.andserver.util.IOUtils;
 
 import java.io.File;
+import java.util.HashMap;
 
 public class BrowserApplication extends Application {
 
@@ -27,6 +31,12 @@ public class BrowserApplication extends Application {
             mInstance = this;
             initRootPath(this);
         }
+        HashMap map = new HashMap();
+        map.put(TbsCoreSettings.TBS_SETTINGS_USE_SPEEDY_CLASSLOADER, true);
+        map.put(TbsCoreSettings.TBS_SETTINGS_USE_DEXLOADER_SERVICE, true);
+        QbSdk.initTbsSettings(map);
+        CrashHandler crashHandler = CrashHandler.getInstance();
+        crashHandler.init(getApplicationContext());
     }
 
     @NonNull

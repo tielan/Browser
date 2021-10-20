@@ -67,6 +67,11 @@ class AppController {
         return event;
     }
 
+    @GetMapping(path = "/getcrashlog", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    String getCrashLog() {
+        return ConfigUtils.getInstance().get("crash.log");
+    }
+
     @GetMapping(path = "/exitApp")
     String exitApp() {
         EventBus.getDefault().post(new ExitAppEvent(true,false));

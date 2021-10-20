@@ -22,6 +22,7 @@ import com.chinacreator.browser.event.ExitAppEvent;
 import com.chinacreator.browser.event.MessageEvent;
 import com.chinacreator.browser.utils.ConfigUtils;
 import com.chinacreator.browser.utils.NetUtils;
+import com.tencent.smtt.sdk.QbSdk;
 import com.tencent.smtt.sdk.WebSettings;
 import com.tencent.smtt.sdk.WebView;
 import com.tencent.smtt.sdk.WebViewClient;
@@ -144,18 +145,15 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             if (v.getId() == R.id.home) {
-                MessageEvent event = ConfigUtils.getInstance().getConfig();
-                webView.loadUrl(event.getUrl());
+                loadUrl();
             } else if (v.getId() == R.id.back) {
                 webView.goBack();
             }
         }
     };
-
-
-    private void loadConfig() {
+    private void loadUrl(){
         MessageEvent event = ConfigUtils.getInstance().getConfig();
-        if (!TextUtils.isEmpty(event.getUrl())) {
+        if (event != null && !TextUtils.isEmpty(event.getUrl())) {
             if (event.getUrl().startsWith("http")) {
                 webView.loadUrl(event.getUrl());
             } else {
@@ -163,6 +161,11 @@ public class MainActivity extends AppCompatActivity {
             }
             infoView.setVisibility(View.GONE);
         }
+    }
+
+    private void loadConfig() {
+        MessageEvent event = ConfigUtils.getInstance().getConfig();
+        loadUrl();
         if (!TextUtils.isEmpty(event.getOrientation())) {
             int o = Integer.parseInt(event.getOrientation());
             if (o == 0) {
@@ -200,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
         if (webView.canGoBack()) {  //表示按返回键
             webView.goBack();   //后退
         } else {
-            super.onBackPressed();
+           // super.onBackPressed();
         }
         return;
     }
@@ -210,11 +213,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         mServer.shutdown();
         if (webView != null) {
-            webView.loadDataWithBaseURL(null, "", "text/html", "utf-8", null);
-            webView.clearHistory();
-            ((ViewGroup) webView.getParent()).removeView(webView);
-            webView.destroy();
-            webView = null;
+            QbSdk.clearAllWebViewCache(this,true);
         }
         EventBus.getDefault().unregister(this);
     }
