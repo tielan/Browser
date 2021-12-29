@@ -42,9 +42,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
     private static CrashHandler INSTANCE = new CrashHandler();  
     //程序的Context对象  
     private Context mContext;  
-    //用来存储设备信息和异常信息  
-    private Map<String, String> infos = new HashMap<String, String>();  
-  
+
     //用于格式化日期,作为日志文件名的一部分  
     private DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");  
   
@@ -112,42 +110,12 @@ public class CrashHandler implements UncaughtExceptionHandler {
                 Looper.loop();  
             }  
         }.start();  
-        //收集设备参数信息   
-        collectDeviceInfo(mContext);  
-        //保存日志文件   
+        //保存日志文件
         saveCrashInfo2File(ex);  
         return true;  
     }  
       
-    /** 
-     * 收集设备参数信息 
-     * @param ctx 
-     */  
-    public void collectDeviceInfo(Context ctx) {  
-        try {  
-            PackageManager pm = ctx.getPackageManager();  
-            PackageInfo pi = pm.getPackageInfo(ctx.getPackageName(), PackageManager.GET_ACTIVITIES);  
-            if (pi != null) {  
-                String versionName = pi.versionName == null ? "null" : pi.versionName;  
-                String versionCode = pi.versionCode + "";  
-                infos.put("versionName", versionName);  
-                infos.put("versionCode", versionCode);  
-            }  
-        } catch (NameNotFoundException e) {  
-            Log.e(TAG, "an error occured when collect package info", e);  
-        }  
-        Field[] fields = Build.class.getDeclaredFields();  
-        for (Field field : fields) {  
-            try {  
-                field.setAccessible(true);  
-                infos.put(field.getName(), field.get(null).toString());  
-                Log.d(TAG, field.getName() + " : " + field.get(null));  
-            } catch (Exception e) {  
-                Log.e(TAG, "an error occured when collect crash info", e);  
-            }  
-        }  
-    }  
-  
+
     /** 
      * 保存错误信息到文件中 
      *  
@@ -155,15 +123,8 @@ public class CrashHandler implements UncaughtExceptionHandler {
      * @return  返回文件名称,便于将文件传送到服务器 
      */  
     private String saveCrashInfo2File(Throwable ex) {  
-          
-        StringBuffer sb = new StringBuffer();  
-        for (Map.Entry<String, String> entry : infos.entrySet()) {  
-            String key = entry.getKey();  
-            String value = entry.getValue();  
-            sb.append(key + "=" + value + "\n");  
-        }  
-          
-        Writer writer = new StringWriter();  
+        StringBuffer sb = new StringBuffer();
+        Writer writer = new StringWriter();
         PrintWriter printWriter = new PrintWriter(writer);  
         ex.printStackTrace(printWriter);  
         Throwable cause = ex.getCause();  

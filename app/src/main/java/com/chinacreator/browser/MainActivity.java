@@ -1,11 +1,13 @@
 package com.chinacreator.browser;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -13,6 +15,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -46,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
     private View infoView;
     private TextView infoTV;
+    private AlertDialog mDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -96,7 +100,45 @@ public class MainActivity extends AppCompatActivity {
         mServer.startup();
         String infoTv = "打开电脑浏览器访问：http://" + NetUtils.getLocalIPAddress().getHostAddress() + ":8080";
         infoTV.setText(infoTv);
+        infoTV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDialog();
+            }
+        });
     }
+
+
+    private void showDialog() {
+        if (mDialog != null) return;
+        final EditText inputServer = new EditText(this);
+        inputServer.setHint("http://172.16.17.1:8080");
+        inputServer.setText(ConfigUtils.getInstance().get("url"));
+        inputServer.setInputType(InputType.TYPE_TEXT_VARIATION_URI);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        int o = 0;
+        if (!TextUtils.isEmpty(ConfigUtils.getInstance().get("screenOrientation"))) {
+            o = Integer.parseInt(ConfigUtils.getInstance().get("screenOrientation"));
+        }
+        MessageEvent event = new MessageEvent();
+        builder.setSingleChoiceItems(new String[]{"默认方向","竖屏","横屏"}, o, (dialog, which) -> {
+            event.setOrientation(which+"");
+        });
+        builder.setView(inputServer)
+                .setNegativeButton("取消", (dialog, which) -> {
+                    mDialog = null;
+                    dialog.dismiss();
+                });
+        builder.setPositiveButton("确定", (dialog, which) -> {
+            mDialog = null;
+            String text = inputServer.getText().toString();
+            event.setUrl(text);
+            ConfigUtils.getInstance().saveConfig(event);
+            loadConfig();
+        });
+        mDialog = builder.show();
+    }
+
 
     /**
      * 接收到消息

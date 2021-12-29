@@ -11,8 +11,8 @@ android {
         applicationId "com.chinacreator.browser"
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 9
-        versionName "1.1.4"
+        versionCode 10
+        versionName "1.1.5"
     }
     signingConfigs {
         myConfig {

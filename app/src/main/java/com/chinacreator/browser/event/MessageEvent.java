@@ -8,7 +8,6 @@ public class MessageEvent {
     private String url;
     private String orientation;
     private String showBack;
-
     public String getShowBack() {
         return showBack;
     }

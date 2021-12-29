@@ -2,7 +2,11 @@ package com.chinacreator.browser;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Environment;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -14,7 +18,9 @@ import com.tencent.smtt.sdk.QbSdk;
 import com.yanzhenjie.andserver.util.IOUtils;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.Map;
 
 public class BrowserApplication extends Application {
 
@@ -22,6 +28,7 @@ public class BrowserApplication extends Application {
     private static BrowserApplication mInstance;
 
     private File mRootDir;
+    private Map<String, String> devicesInfo = new HashMap<String, String>();
 
     @Override
     public void onCreate() {
@@ -37,6 +44,33 @@ public class BrowserApplication extends Application {
         QbSdk.initTbsSettings(map);
         CrashHandler crashHandler = CrashHandler.getInstance();
         crashHandler.init(getApplicationContext());
+        collectDeviceInfo(this);
+    }
+
+    public Map<String, String> getDevicesInfo() {
+        return devicesInfo;
+    }
+
+    public void collectDeviceInfo(Context ctx) {
+        try {
+            PackageManager pm = ctx.getPackageManager();
+            PackageInfo pi = pm.getPackageInfo(ctx.getPackageName(), PackageManager.GET_ACTIVITIES);
+            if (pi != null) {
+                String versionName = pi.versionName == null ? "null" : pi.versionName;
+                String versionCode = pi.versionCode + "";
+                devicesInfo.put("versionName", versionName);
+                devicesInfo.put("versionCode", versionCode);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+        }
+        Field[] fields = Build.class.getDeclaredFields();
+        for (Field field : fields) {
+            try {
+                field.setAccessible(true);
+                devicesInfo.put(field.getName(), field.get(null).toString());
+            } catch (Exception e) {
+            }
+        }
     }
 
     @NonNull

@@ -15,6 +15,7 @@
  */
 package com.chinacreator.browser.controller;
 
+import com.chinacreator.browser.BrowserApplication;
 import com.chinacreator.browser.event.ExitAppEvent;
 import com.chinacreator.browser.event.MessageEvent;
 import com.chinacreator.browser.utils.ConfigUtils;
@@ -35,6 +36,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Created by Zhenjie Yan on 2018/6/9.
@@ -67,9 +69,14 @@ class AppController {
         return event;
     }
 
-    @GetMapping(path = "/getcrashlog", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(path = "/getCrashLog", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     String getCrashLog() {
         return ConfigUtils.getInstance().get("crash.log");
+    }
+
+    @GetMapping(path = "/getDeviceInfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    Map<String,String> getDeviceInfo() {
+        return BrowserApplication.getInstance().getDevicesInfo();
     }
 
     @GetMapping(path = "/exitApp")

@@ -2,10 +2,10 @@ package com.chinacreator.browser.component;
 
 import androidx.annotation.NonNull;
 
+import com.chinacreator.browser.body.JsonBody;
 import com.yanzhenjie.andserver.annotation.Resolver;
 import com.yanzhenjie.andserver.error.HttpException;
 import com.yanzhenjie.andserver.framework.ExceptionResolver;
-import com.yanzhenjie.andserver.framework.body.JsonBody;
 import com.yanzhenjie.andserver.http.HttpRequest;
 import com.yanzhenjie.andserver.http.HttpResponse;
 import com.yanzhenjie.andserver.http.StatusCode;
